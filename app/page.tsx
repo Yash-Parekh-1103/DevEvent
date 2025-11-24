@@ -1,10 +1,22 @@
 import EventCard from "@/Components/EventCard"
 import ExploreBtn from "@/Components/ExploreBtn"
-import { events } from "@/lib/constants"
+import { IEvent } from "@/database";
+// import { events } from "@/lib/constants"
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 // Sample events data
 
-const page = () => {
+const page =  async () => {
+
+  const response = await fetch(`${BASE_URL ?? ''}/api/events`);
+  const data = await response.json();
+  // API returns { message, events } — ensure we use the events array
+  const events: IEvent[] = Array.isArray(data?.events) ? data.events : [];
+
+
+
+// /api/events/next-js-conf-2026 INC++ seo
+
   return (
     <section>
       <h1 className="text-center">The Hub For Every Dev <br /> Event You Can't Miss</h1>
@@ -22,7 +34,7 @@ const page = () => {
       // If we used curly braces, we would need to use a return statement inside the function body
       // This is a concise way to map over an array and render elements */}
 
-     { events.map((event) => (
+    {  events.map((event: IEvent) => (
         // <li key={event}>Event {event}</li> //before
         <li key={event.title}>
           <EventCard {...event} />
