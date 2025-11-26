@@ -1,4 +1,7 @@
 import BookEvent from '@/Components/BookEvent';
+import EventCard from '@/Components/EventCard';
+import { IEvent } from '@/database';
+import { getsimilarEventsBySlug } from '@/lib/actions/event.actions';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import React from 'react'
@@ -107,6 +110,10 @@ const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) =>
 
     const bookings = 10;
 
+
+    // type of IEvent Arrays
+    const similarEvents: IEvent[] = await getsimilarEventsBySlug(slug);
+
   return (
     
     <section id='event'>
@@ -196,12 +203,22 @@ const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) =>
 
          </div>
         </aside>
+          </div>
 
+          <div className='flex-w-full flex-col gap-4 pt-20'>
+            <h2>Similar Events</h2>
+            <div className='events'> 
 
+            {similarEvents.length > 0 && similarEvents.map((ev: IEvent) => (
+              <EventCard key={ev.slug ?? ev.title} {...ev} />
+            ))}
 
+            
+            </div>
           </div>
     </section>
   )
 }
+
 
 export default EventDetailPage

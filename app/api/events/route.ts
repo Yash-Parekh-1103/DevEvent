@@ -72,12 +72,38 @@ export async function POST(req: NextRequest) {
 
         if(!file) return NextResponse.json({Message : "Image is required"}, {status : 400}); 
 
+        // Safely parse tags and agenda only if formData is present, otherwise fall back to values in event or empty arrays
+        let tags: any[] = [];
+        let agenda: any[] = [];
+
+        if (formData) {
+            const rawTags = formData.get('tags');
+            if (typeof rawTags === 'string') {
+                try { tags = JSON.parse(rawTags); } catch { tags = []; }
+            } else if (rawTags != null) {
+                try { tags = JSON.parse(String(rawTags)); } catch { tags = []; }
+            }
+
+            const rawAgenda = formData.get('agenda');
+            if (typeof rawAgenda === 'string') {
+                try { agenda = JSON.parse(rawAgenda); } catch { agenda = []; }
+            } else if (rawAgenda != null) {
+                try { agenda = JSON.parse(String(rawAgenda)); } catch { agenda = []; }
+            }
+        } else {
+            if (Array.isArray(event?.tags)) tags = event.tags;
+            if (Array.isArray(event?.agenda)) agenda = event.agenda;
+        }
+
+        // assign parsed values back to event so Mongoose validation sees them
+        event.tags = tags;
+        event.agenda = agenda;
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         // create and let mongoose validate — validation errors will be caught below
-        const createdEvent = await Event.create(event);
-
+        
         const uploadResult = await new Promise((resolve, reject) => {
 
             cloudinary.uploader.upload_stream({ resource_type: 'image', folder: "DevEvent" }, (error, result) => {
@@ -87,6 +113,13 @@ export async function POST(req: NextRequest) {
         });
 
         event.image = (uploadResult as { secure_url: string }).secure_url;
+
+        const createdEvent = await Event.create({
+            
+            ...event,
+            tags: tags,
+            agenda: agenda,
+        });
 
         return NextResponse.json({message : "Event Created Successfully" , event : createdEvent}, { status: 201 });
         
