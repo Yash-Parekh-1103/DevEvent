@@ -195,12 +195,9 @@ const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) =>
 
           )}
 
-          <BookEvent/>
+          <BookEvent eventId={String(eventData._id)} slug={String(eventData.slug)} />
           
-          
-          
-          
-
+        
          </div>
         </aside>
           </div>
@@ -222,3 +219,6 @@ const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) =>
 
 
 export default EventDetailPage
+
+
+
