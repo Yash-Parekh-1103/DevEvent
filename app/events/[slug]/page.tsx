@@ -8,6 +8,13 @@ import React from 'react'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
+// Normalize base URL — prepend https:// if the deploy set only a hostname.
+const normalizedBase = BASE_URL
+  ? BASE_URL.startsWith('http')
+    ? BASE_URL
+    : `https://${BASE_URL}`
+  : '';
+
 
 // Reusable component for event detail items
 
@@ -58,7 +65,7 @@ const EventTags = ({tags} : {tags : string[]}) => (
 
 const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) => {
     const {slug} = await params;
-    const request = await fetch(`${BASE_URL ?? ''}/api/events/${slug}`);
+    const request = await fetch(`${normalizedBase}/api/events/${slug}`);
     const response = await request.json();
 
     // API returns { event: {...} } or just the event object

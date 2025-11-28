@@ -4,11 +4,21 @@ import { IEvent } from "@/database";
 // import { events } from "@/lib/constants"
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+// Ensure BASE_URL is a usable absolute URL in production builds.
+// Some deploys may set only the hostname (e.g. 'devevents-delta.vercel.app').
+// If so, prepend `https://`. When BASE_URL is not set, fall back to
+// a relative API path by using an empty string.
+const normalizedBase = BASE_URL
+  ? BASE_URL.startsWith('http')
+    ? BASE_URL
+    : `https://${BASE_URL}`
+  : '';
 // Sample events data
 
 const page =  async () => {
 
-  const response = await fetch(`${BASE_URL ?? ''}/api/events`);
+  const response = await fetch(`${normalizedBase}/api/events`);
   const data = await response.json();
   // API returns { message, events } — ensure we use the events array
   const events: IEvent[] = Array.isArray(data?.events) ? data.events : [];
