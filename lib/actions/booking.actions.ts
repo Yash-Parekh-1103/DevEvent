@@ -36,7 +36,12 @@ export const createBooking = async ({eventId , slug , email}: {eventId: string ,
 
     } catch (error) {
                 console.log("Booking creation failed", error);
-                // only return serializable error information to client components
+                // Check if it's a duplicate key error (MongoDB error code 11000)
+                if (error instanceof Error && error.message.includes('E11000')) {
+                    // User already booked this event — return as success with info message
+                    return { success: true, info: 'You have already booked this event' };
+                }
+                // For other errors, return as failure
                 const message = error instanceof Error ? error.message : String(error);
                 return { success: false, error: { message } };
     }

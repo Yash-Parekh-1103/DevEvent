@@ -14,6 +14,7 @@ const BookEvent = ({ eventId, slug }: BookEventProps) => {
                 const [email, setEmail] = useState('');
                 const [submitted, setSubmitted] = useState(false);
                 const [error, setError] = useState<string | null>(null);
+                const [info, setInfo] = useState<string | null>(null);
 
                 // after form submission this callback function will be executed
                 const handleSubmit = async (e: React.FormEvent) => {
@@ -25,14 +26,25 @@ const BookEvent = ({ eventId, slug }: BookEventProps) => {
                             const res = await createBooking({ eventId: eventId ?? '', slug: slug ?? '', email });
 
                             if (res?.success) {
-                                setSubmitted(true);
-                                setError(null);
-                                posthog.capture('event booked!', { eventId, slug, email });
+                                // Check if this was an informational response (duplicate booking) or successful booking
+                                if (res?.info) {
+                                    // Already booked — show friendly blue info message
+                                    setInfo(res.info);
+                                    setError(null);
+                                    posthog.capture('event booking already exists', { eventId, slug, email });
+                                } else {
+                                    // New booking successful
+                                    setSubmitted(true);
+                                    setError(null);
+                                    setInfo(null);
+                                    posthog.capture('event booked!', { eventId, slug, email });
+                                }
                             } else {
                                 // server responded but indicated failure
                                 const msg = res?.error?.message ?? JSON.stringify(res?.error ?? res ?? {});
                                 console.error('Booking failed', msg);
                                 setError(msg || 'Booking failed');
+                                setInfo(null);
                                 posthog.capture('event booking failed!', { eventId, slug, email, reason: msg });
                             }
                         } catch (err: any) {
@@ -40,6 +52,7 @@ const BookEvent = ({ eventId, slug }: BookEventProps) => {
                             const isAbort = err?.name === 'AbortError' || (err?.message && err.message.includes('aborted'));
                             console.error('Booking request failed', err);
                             setError(isAbort ? 'Request was aborted' : (err?.message ?? String(err)));
+                            setInfo(null);
                             posthog.capture('event booking failed!', { eventId, slug, email, reason: String(err) });
                         }
 
@@ -70,6 +83,10 @@ const BookEvent = ({ eventId, slug }: BookEventProps) => {
 
                 {error && (
                     <p className="text-sm text-red-500 mt-2">{error}</p>
+                )}
+
+                {info && (
+                    <p className="text-sm text-blue-500 mt-2">{info}</p>
                 )}
 
 
