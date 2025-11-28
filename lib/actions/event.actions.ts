@@ -24,3 +24,23 @@ export const getsimilarEventsBySlug = async (slug: string): Promise<IEvent[]> =>
         return [];
     }
 }
+
+export const getAllEvents = async (): Promise<IEvent[]> => {
+    try {
+        await connectDB();
+        const results = await Event.find().sort({ createdAt: -1 }).lean();
+        return results as unknown as IEvent[];
+    } catch (error) {
+        return [];
+    }
+}
+
+export const getEventBySlug = async (slug: string): Promise<IEvent | null> => {
+    try {
+        await connectDB();
+        const ev = await Event.findOne({ slug }).lean();
+        return ev as unknown as IEvent | null;
+    } catch (error) {
+        return null;
+    }
+}

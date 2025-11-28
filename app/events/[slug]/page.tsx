@@ -1,19 +1,11 @@
 import BookEvent from '@/Components/BookEvent';
 import EventCard from '@/Components/EventCard';
 import { IEvent } from '@/database';
-import { getsimilarEventsBySlug } from '@/lib/actions/event.actions';
+import { getsimilarEventsBySlug, getEventBySlug } from '@/lib/actions/event.actions';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import React from 'react'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
-// Normalize base URL — prepend https:// if the deploy set only a hostname.
-const normalizedBase = BASE_URL
-  ? BASE_URL.startsWith('http')
-    ? BASE_URL
-    : `https://${BASE_URL}`
-  : '';
 
 
 // Reusable component for event detail items
@@ -65,11 +57,9 @@ const EventTags = ({tags} : {tags : string[]}) => (
 
 const EventDetailPage =  async ({params} : {params: Promise<{slug: string}>}) => {
     const {slug} = await params;
-    const request = await fetch(`${normalizedBase}/api/events/${slug}`);
-    const response = await request.json();
 
-    // API returns { event: {...} } or just the event object
-    const eventData = response?.event || response;
+    // Load the event directly from the database during server rendering.
+    const eventData: IEvent | null = await getEventBySlug(slug);
     if (!eventData || !eventData.description) return notFound();
 
     const { image, date, time, location, description, overview, mode, audience, agenda, tags , organizer } = eventData;
