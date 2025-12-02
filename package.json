@@ -9,11 +9,16 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.35.5",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.553.0",
+    "mongoose": "^8.20.0",
     "next": "16.0.1",
     "ogl": "^1.0.11",
+    "posthog-js": "^1.290.0",
+    "posthog-node": "^5.11.2",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "tailwind-merge": "^3.3.1"

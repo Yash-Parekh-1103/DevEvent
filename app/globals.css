@@ -95,7 +95,7 @@
 }
 
 @utility text-gradient {
-  @apply to-blue bg-gradient-to-b from-white via-white bg-clip-text font-semibold text-transparent;
+  @apply to-blue bg-linear-to-b from-white via-white bg-clip-text font-semibold text-transparent;
 }
 
 @utility glass {
